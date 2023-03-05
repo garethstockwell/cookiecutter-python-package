@@ -1,0 +1,40 @@
+# This workflow installs Python dependencies, runs static checks and tests with
+# a variety of Python versions.
+#
+# For further information, see:
+# https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: dev
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9, "3.10", 3.11]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python {% raw %}${{ matrix.python-version }}{% endraw %}
+      uses: actions/setup-python@v2
+      with:
+        python-version: {% raw %}${{ matrix.python-version }}{% endraw %}
+    - name: Install tox
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox
+    - name: Run black
+      run: |
+        tox -e black
+    - name: Run pylint
+      run: |
+        tox -e pylint
+    - name: Run pytest
+      run: |
+        tox -e py
